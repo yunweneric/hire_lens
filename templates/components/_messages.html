@@ -1,0 +1,13 @@
+{% if messages %}
+<div class="mb-4 flex flex-col gap-2">
+  {% for message in messages %}
+  <div class="alert text-sm
+    {% if 'error' in message.tags %}alert-destructive bg-destructive/10
+    {% elif 'success' in message.tags %}alert-success bg-success/10
+    {% elif 'warning' in message.tags %}border-warning/50 bg-warning/10 text-warning
+    {% else %}border-border bg-muted/50{% endif %}">
+    {{ message }}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}

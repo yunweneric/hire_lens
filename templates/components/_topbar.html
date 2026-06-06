@@ -1,0 +1,19 @@
+<header class="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+  <button @click="sidebarOpen = !sidebarOpen" class="btn-ghost btn-icon -ml-2 lg:hidden" aria-label="Menu">
+    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  </button>
+
+  <div class="hidden min-w-0 flex-1 lg:block">
+    {% block topbar_title %}{% endblock %}
+  </div>
+
+  <div class="ml-auto flex items-center gap-3">
+    <span class="hidden text-sm text-muted-foreground sm:inline">{{ user.username }}</span>
+    <form method="post" action="{% url 'accounts:logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn-ghost btn-sm text-muted-foreground">Logout</button>
+    </form>
+  </div>
+</header>

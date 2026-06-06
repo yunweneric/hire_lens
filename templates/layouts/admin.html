@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en"
+      x-data="{ sidebarOpen: false }"
+      style="--sidebar-width: 18rem;">
+<head>
+  {% include "components/_theme_init.html" %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ page_title|default:"Admin" }}{% endblock %} | HireLens</title>
+  <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'dist/output.css' %}">
+  <script src="{% static 'js/theme.js' %}"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="h-svh overflow-hidden bg-background text-foreground antialiased">
+  <div class="admin-shell">
+    {% include "components/_admin_sidebar.html" %}
+
+    <div class="admin-main">
+      {% include "components/_admin_header.html" %}
+
+      <div class="{% block admin_content_class %}admin-content{% endblock %}">
+        {% include "components/_messages.html" %}
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+
+    <div x-show="sidebarOpen" x-cloak @click="sidebarOpen = false"
+         class="fixed inset-0 z-40 bg-black/40 lg:hidden"></div>
+  </div>
+
+  <style>[x-cloak] { display: none !important; }</style>
+</body>
+</html>

@@ -1,0 +1,6 @@
+<div class="alert {% if variant == 'destructive' %}alert-destructive bg-destructive/10{% elif variant == 'success' %}alert-success bg-success/10{% else %}border-border bg-background{% endif %}">
+  {% if title %}
+  <p class="font-medium">{{ title }}</p>
+  {% endif %}
+  <div class="{% if title %}mt-1 text-sm opacity-90{% endif %}">{{ message }}</div>
+</div>

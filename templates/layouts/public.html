@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% include "components/_theme_init.html" %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ page_title|default:"Careers" }}{% endblock %} | HireLens</title>
+  <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'dist/output.css' %}">
+  <script src="{% static 'js/theme.js' %}"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="flex min-h-screen flex-col bg-background text-foreground antialiased">
+  <header class="public-header">
+    <div class="container-page flex h-16 items-center justify-between">
+      <a href="{% url 'jobs:public_list' %}" class="flex items-center gap-2.5">
+        <img src="{% static 'img/logo-icon.png' %}" alt="" class="size-8 rounded-lg" />
+        <span class="text-base font-bold tracking-tight">HireLens</span>
+      </a>
+      <nav class="flex items-center gap-1 sm:gap-2">
+        <a href="{% url 'jobs:public_list' %}" class="nav-link hidden sm:block">Open roles</a>
+        {% include "components/_theme_switcher.html" %}
+        <a href="{% url 'accounts:login' %}" class="btn-outline btn-sm">Admin login</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1">
+    {% block full_content %}
+    <div class="container-page py-10 sm:py-14">
+      {% include "components/_messages.html" %}
+      {% block content %}{% endblock %}
+    </div>
+    {% endblock %}
+  </main>
+
+  <footer class="border-t border-border/60">
+    <div class="container-page flex flex-col items-center justify-between gap-4 py-8 sm:flex-row">
+      <div class="flex items-center gap-2.5">
+        <img src="{% static 'img/logo-icon.png' %}" alt="" class="size-6 rounded-md" />
+        <span class="text-sm font-semibold">HireLens</span>
+      </div>
+      <p class="text-sm text-muted-foreground">&copy; {% now "Y" %} HireLens. AI-powered hiring.</p>
+    </div>
+  </footer>
+</body>
+</html>

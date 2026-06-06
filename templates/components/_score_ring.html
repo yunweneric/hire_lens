@@ -1,0 +1,21 @@
+<div class="rounded-lg border bg-card p-6 text-center"
+     x-data="{ score: {{ score|default:0 }}, animated: 0 }"
+     x-init="setTimeout(() => animated = score, 150)">
+  <div class="relative mx-auto size-36">
+    <svg class="size-36 -rotate-90" viewBox="0 0 120 120">
+      <circle cx="60" cy="60" r="52" fill="none" stroke-width="8" class="stroke-muted"/>
+      <circle cx="60" cy="60" r="52" fill="none" stroke-width="8"
+              stroke="hsl(var(--primary))" stroke-linecap="round"
+              class="transition-all duration-700 ease-out"
+              :stroke-dasharray="326.73"
+              :stroke-dashoffset="326.73 - (326.73 * animated / 100)"/>
+    </svg>
+    <div class="absolute inset-0 flex flex-col items-center justify-center">
+      <span class="text-3xl font-semibold tabular-nums" x-text="Math.round(animated)"></span>
+      <span class="text-xs text-muted-foreground">%</span>
+    </div>
+  </div>
+  {% if score_label %}
+  <p class="mt-4 text-xs text-muted-foreground">{{ score_label }}</p>
+  {% endif %}
+</div>

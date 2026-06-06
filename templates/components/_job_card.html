@@ -1,0 +1,30 @@
+<article class="job-card group">
+  <div class="flex items-start justify-between gap-3">
+    <span class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand">
+      <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+    </span>
+    <time class="text-xs text-muted-foreground">{{ job.created_at|date:"M j, Y" }}</time>
+  </div>
+
+  <div class="min-w-0">
+    <h3 class="text-base font-semibold leading-snug">
+      <a href="{% url 'jobs:public_detail' slug=job.slug %}" class="after:absolute after:inset-0 group-hover:text-brand">
+        {{ job.title }}
+      </a>
+    </h3>
+    <p class="mt-2 line-clamp-3 text-sm text-muted-foreground">{{ job.description|striptags|truncatewords:28 }}</p>
+  </div>
+
+  {% if job.required_skills %}
+  <div class="flex flex-wrap gap-1.5">
+    {% for skill in job.required_skills|slice:":4" %}
+    <span class="chip">{{ skill }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="mt-auto flex items-center justify-between border-t border-border/60 pt-4">
+    <span class="text-sm font-medium text-brand">View role</span>
+    <svg class="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+  </div>
+</article>

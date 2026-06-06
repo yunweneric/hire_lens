@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Resumes{% endblock %}
+
+{% block content %}
+{% include "components/_page_header.html" with page_heading="Resumes" page_description="Uploaded candidate resumes." %}
+
+<div class="mb-6 flex justify-end">
+  <a href="{% url 'resumes:upload' %}" class="btn-primary btn-sm">Upload</a>
+</div>
+
+<div class="rounded-lg border bg-card">
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="border-b text-left text-xs text-muted-foreground">
+        <th class="w-12 px-5 py-3 font-medium">#</th>
+        <th class="px-5 py-3 font-medium">Candidate</th>
+        <th class="px-5 py-3 font-medium">Uploaded by</th>
+        <th class="px-5 py-3 font-medium">Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for resume in resumes %}
+      <tr class="border-b last:border-0">
+        <td class="px-5 py-3 text-muted-foreground tabular-nums">{{ forloop.counter }}</td>
+        <td class="px-5 py-3 font-medium">{{ resume.candidate_name|default:"Unnamed" }}</td>
+        <td class="px-5 py-3 text-muted-foreground">{{ resume.uploaded_by.username }}</td>
+        <td class="px-5 py-3 text-muted-foreground">{{ resume.created_at|date:"M j, Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4" class="px-5 py-10 text-center text-muted-foreground">
+          No resumes yet. <a href="{% url 'resumes:upload' %}" class="text-primary hover:underline">Upload one</a>.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

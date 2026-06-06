@@ -1,0 +1,9 @@
+<div x-data="{ fileName: '' }">
+  <label class="flex cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed px-6 py-10 transition-colors hover:bg-muted/40">
+    <p class="text-sm font-medium">Drop file or click to browse</p>
+    <p class="mt-1 text-xs text-muted-foreground">PDF or DOCX</p>
+    <input type="file" name="file" accept=".pdf,.docx" class="hidden" required
+           @change="fileName = $event.target.files[0]?.name || ''">
+  </label>
+  <p x-show="fileName" x-text="fileName" class="mt-2 text-center text-xs text-muted-foreground"></p>
+</div>

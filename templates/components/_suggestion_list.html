@@ -1,0 +1,12 @@
+<section class="rounded-lg border bg-card p-5">
+  <h2 class="text-sm font-medium">Recommendations</h2>
+  <ol class="mt-4 flex flex-col gap-2">
+    {% for suggestion in suggestions %}
+    <li class="text-sm text-muted-foreground">
+      <span class="mr-2 text-foreground">{{ forloop.counter }}.</span>{{ suggestion }}
+    </li>
+    {% empty %}
+    <li class="text-sm text-muted-foreground">No recommendations.</li>
+    {% endfor %}
+  </ol>
+</section>

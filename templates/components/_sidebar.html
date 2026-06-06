@@ -1,0 +1,39 @@
+{% load static %}
+<aside
+  class="fixed inset-y-0 left-0 z-50 flex w-56 flex-col border-r bg-background transition-transform duration-200 lg:translate-x-0"
+  :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+>
+  <div class="flex h-14 items-center gap-2.5 px-4">
+    <img src="{% static 'img/logo-icon.png' %}" alt="" class="size-7 rounded-md" />
+    <span class="text-sm font-semibold">HireLens</span>
+  </div>
+
+  <nav class="flex flex-1 flex-col gap-0.5 px-3 py-2">
+    {% with path=request.path %}
+    <a href="{% url 'dashboard:index' %}" class="{% if path == '/' or path == '/dashboard/' %}nav-link-active{% else %}nav-link{% endif %}">
+      Dashboard
+    </a>
+    <a href="{% url 'resumes:list' %}" class="{% if '/resumes/' in path and 'upload' not in path %}nav-link-active{% else %}nav-link{% endif %}">
+      Resumes
+    </a>
+    <a href="{% url 'rankings' %}" class="{% if '/rankings/' in path %}nav-link-active{% else %}nav-link{% endif %}">
+      Candidates
+    </a>
+    <a href="{% url 'jobs:list' %}" class="{% if '/jobs/' in path %}nav-link-active{% else %}nav-link{% endif %}">
+      Jobs
+    </a>
+    <a href="{% url 'analysis:detail' pk=1 %}" class="{% if '/analysis/' in path %}nav-link-active{% else %}nav-link{% endif %}">
+      Analysis
+    </a>
+    {% endwith %}
+  </nav>
+
+  <div class="flex flex-col gap-1 border-t p-3">
+    <a href="{% url 'resumes:upload' %}" class="btn-primary btn-sm w-full justify-center">
+      Upload resume
+    </a>
+    <button type="button" @click="toggleTheme()" class="nav-link w-full justify-center text-xs" aria-label="Toggle theme">
+      <span x-text="dark ? 'Light mode' : 'Dark mode'"></span>
+    </button>
+  </div>
+</aside>

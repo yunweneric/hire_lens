@@ -1,0 +1,21 @@
+<div class="flex flex-col gap-2">
+  {% if label %}
+  <label for="{{ id }}" class="label">{{ label }}</label>
+  {% endif %}
+  <input
+    type="{{ type|default:'text' }}"
+    id="{{ id }}"
+    name="{{ name }}"
+    value="{{ value|default:'' }}"
+    placeholder="{{ placeholder|default:'' }}"
+    class="input {% if error %}border-destructive focus-visible:ring-destructive{% endif %}"
+    {% if required %}required{% endif %}
+    {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+  />
+  {% if hint %}
+  <p class="text-xs text-muted-foreground">{{ hint }}</p>
+  {% endif %}
+  {% if error %}
+  <p class="text-xs text-destructive">{{ error }}</p>
+  {% endif %}
+</div>

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Jobs{% endblock %}
+
+{% block content %}
+{% include "components/_page_header.html" with page_heading="Jobs" page_description="Job descriptions for resume matching." %}
+
+<div class="grid gap-8 lg:grid-cols-2">
+  <section class="rounded-lg border bg-card p-5">
+    <h2 class="text-sm font-medium">New job</h2>
+    <form method="post" class="mt-4 flex flex-col gap-4">
+      {% csrf_token %}
+      <div class="flex flex-col gap-2">
+        <label for="id_title" class="label">Title</label>
+        {{ form.title }}
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="id_description" class="label">Description</label>
+        {{ form.description }}
+      </div>
+      <button type="submit" class="btn-primary btn-sm w-fit">Create</button>
+    </form>
+  </section>
+
+  <section class="rounded-lg border bg-card p-5">
+    <h2 class="text-sm font-medium">Active jobs</h2>
+    {% if jobs %}
+    <ul class="mt-4 flex flex-col divide-y">
+      {% for job in jobs %}
+      <li class="py-4 first:pt-0">
+        <p class="font-medium">{{ job.title }}</p>
+        <p class="mt-1 text-sm text-muted-foreground line-clamp-2">{{ job.description|truncatewords:24 }}</p>
+        <p class="mt-2 text-xs text-muted-foreground">{{ job.created_at|date:"M j, Y" }}</p>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="mt-4 text-sm text-muted-foreground">No jobs yet.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

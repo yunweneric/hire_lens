@@ -1,0 +1,63 @@
+{% extends "layouts/admin.html" %}
+
+{% block content %}
+<div class="data-table-panel">
+  <div class="data-table-toolbar">
+    <div>
+      <h2 class="text-base font-semibold">Jobs</h2>
+      <p class="text-sm text-muted-foreground">Manage job postings and applicants.</p>
+    </div>
+    <a href="{% url 'admin_panel:job_create' %}" class="btn-primary btn-sm">New job</a>
+  </div>
+
+{% if jobs %}
+  <div class="table-wrapper">
+  <table class="table w-full">
+    <thead class="table-header">
+      <tr>
+        <th class="table-cell w-12 text-left text-muted-foreground">#</th>
+        <th class="table-cell text-left">Title</th>
+        <th class="table-cell text-left">Status</th>
+        <th class="table-cell text-left">Applicants</th>
+        <th class="table-cell text-left">Created</th>
+        <th class="table-cell text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for job in jobs %}
+      <tr class="table-row">
+        <td class="table-cell text-muted-foreground tabular-nums">{{ forloop.counter }}</td>
+        <td class="table-cell font-medium">{{ job.title }}</td>
+        <td class="table-cell">
+          {% if job.is_published %}
+            <span class="badge-success">Published</span>
+          {% else %}
+            <span class="badge-default">Draft</span>
+          {% endif %}
+        </td>
+        <td class="table-cell">{{ job.application_count }}</td>
+        <td class="table-cell text-muted-foreground">{{ job.created_at|date:"M j, Y" }}</td>
+        <td class="table-cell text-right">
+          <a href="{% url 'admin_panel:job_applicants' job_id=job.pk %}" class="btn-ghost btn-sm">Applicants</a>
+          <a href="{% url 'admin_panel:job_rankings' job_id=job.pk %}" class="btn-ghost btn-sm">Rankings</a>
+          <a href="{% url 'admin_panel:job_edit' pk=job.pk %}" class="btn-ghost btn-sm">Edit</a>
+          <form method="post" action="{% url 'admin_panel:job_toggle_publish' pk=job.pk %}" class="inline">
+            {% csrf_token %}
+            <button type="submit" class="btn-ghost btn-sm">
+              {% if job.is_published %}Unpublish{% else %}Publish{% endif %}
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+{% else %}
+  <div class="px-6 py-12">
+  {% include "components/_empty_state.html" with title="No jobs yet" description="Create your first job posting." %}
+  <div class="mt-4 text-center"><a href="{% url 'admin_panel:job_create' %}" class="btn-primary">New job</a></div>
+  </div>
+{% endif %}
+</div>
+{% endblock %}

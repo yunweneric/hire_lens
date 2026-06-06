@@ -1,0 +1,68 @@
+{% extends "layouts/admin.html" %}
+
+{% block content %}
+<div class="data-table-panel">
+  <div class="data-table-toolbar">
+    <div>
+      <h2 class="text-base font-semibold">{{ job.title }}</h2>
+      <p class="text-sm text-muted-foreground">Review and analyze applicants for this role.</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <a href="{% url 'admin_panel:jobs_list' %}" class="btn-outline btn-sm">All jobs</a>
+      <a href="{% url 'admin_panel:job_rankings' job_id=job.pk %}" class="btn-outline btn-sm">Rankings</a>
+      {% if job.is_published %}
+      <a href="{% url 'jobs:public_detail' slug=job.slug %}" class="btn-ghost btn-sm" target="_blank" rel="noopener">Public page</a>
+      {% endif %}
+    </div>
+  </div>
+
+{% if applications %}
+  <div class="table-wrapper">
+  <table class="table w-full">
+    <thead class="table-header sticky top-0 bg-card">
+      <tr>
+        <th class="table-cell w-12 text-left text-muted-foreground">#</th>
+        <th class="table-cell text-left">Name</th>
+        <th class="table-cell text-left">Email</th>
+        <th class="table-cell text-left">Applied</th>
+        <th class="table-cell text-left">Analysis</th>
+        <th class="table-cell text-left">Score</th>
+        <th class="table-cell text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for app in applications %}
+      <tr class="table-row">
+        <td class="table-cell text-muted-foreground tabular-nums">{{ forloop.counter }}</td>
+        <td class="table-cell font-medium">{{ app.full_name }}</td>
+        <td class="table-cell text-muted-foreground">{{ app.email }}</td>
+        <td class="table-cell text-muted-foreground">{{ app.created_at|date:"M j, Y" }}</td>
+        <td class="table-cell">
+          {% if app.analysis %}
+            <span class="badge-success">Analyzed</span>
+          {% else %}
+            <span class="badge-warning">Pending</span>
+          {% endif %}
+        </td>
+        <td class="table-cell">
+          {% if app.analysis %}
+            {{ app.analysis.ats_score|floatformat:0 }}%
+          {% else %}
+            —
+          {% endif %}
+        </td>
+        <td class="table-cell text-right">
+          <a href="{% url 'admin_panel:application_detail' pk=app.pk %}" class="btn-ghost btn-sm">View</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+{% else %}
+  <div class="px-6 py-12">
+  {% include "components/_empty_state.html" with title="No applicants yet" description="Applications will appear here once candidates apply on the public job board." %}
+  </div>
+{% endif %}
+</div>
+{% endblock %}

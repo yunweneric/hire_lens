@@ -1,0 +1,123 @@
+{% load static %}
+{# Desktop sidebar — shadcn dashboard-01 structure #}
+<aside class="admin-sidebar">
+  {# SidebarHeader: team switcher #}
+  <div class="sidebar-header">
+    <a href="{% url 'admin_panel:dashboard' %}" class="sidebar-menu-btn-lg">
+      <span class="sidebar-menu-icon-box">
+        <img src="{% static 'img/logo-icon.png' %}" alt="" class="size-4 rounded-sm" />
+      </span>
+      <span class="sidebar-menu-text">
+        <span class="truncate font-semibold">HireLens</span>
+        <span class="truncate text-xs text-muted-foreground">Recruitment</span>
+      </span>
+      <svg class="ml-auto size-4 shrink-0 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+    </a>
+  </div>
+
+  {# SidebarContent — scrollable nav only #}
+  <div class="sidebar-content-scroll">
+    {# NavMain: Quick Create + primary nav #}
+    <div class="sidebar-group">
+      <div class="sidebar-group-content">
+        <ul class="sidebar-menu">
+          <li>
+            <a href="{% url 'admin_panel:job_create' %}" class="sidebar-quick-create">
+              <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              Quick Create
+            </a>
+          </li>
+        </ul>
+        <ul class="sidebar-menu mt-1">
+          {% with path=request.path %}
+          <li>
+            <a href="{% url 'admin_panel:dashboard' %}"
+               class="sidebar-menu-btn {% if path == '/admin/' or path == '/admin' %}is-active{% endif %}">
+              <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'admin_panel:jobs_list' %}"
+               class="sidebar-menu-btn {% if '/admin/jobs' in path %}is-active{% endif %}">
+              <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              <span>Jobs</span>
+            </a>
+          </li>
+          {% endwith %}
+        </ul>
+      </div>
+    </div>
+
+    {# Documents group (shadcn-style secondary section) #}
+    <div class="sidebar-group">
+      <p class="sidebar-group-label">Documents</p>
+      <ul class="sidebar-menu">
+        <li>
+          <a href="{% url 'jobs:public_list' %}" class="sidebar-menu-btn" target="_blank" rel="noopener">
+            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            <span>Public job board</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  {# Preferences + user — no overflow clip #}
+  <div class="sidebar-footer">
+    <p class="sidebar-group-label px-2">Preferences</p>
+    <div class="px-2 pb-2">
+      {% include "components/_theme_switcher.html" with dropup=True %}
+    </div>
+    <div class="sidebar-menu border-t border-sidebar-border pt-2">
+      <div class="relative w-full" x-data="{ userOpen: false }" @click.outside="userOpen = false">
+        <button type="button" @click="userOpen = !userOpen" class="sidebar-menu-btn-lg w-full">
+          <span class="avatar">
+            <span class="avatar-fallback">{{ user.username|slice:":1"|upper }}</span>
+          </span>
+          <span class="sidebar-menu-text min-w-0">
+            <span class="truncate font-semibold">{{ user.get_full_name|default:user.username }}</span>
+            <span class="truncate text-xs text-muted-foreground">{{ user.email|default:"admin@hirelens.local" }}</span>
+          </span>
+          <svg class="ml-auto size-4 shrink-0 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01"/></svg>
+        </button>
+        <div x-show="userOpen" x-cloak x-transition class="sidebar-user-menu">
+          <div class="border-b px-3 py-2">
+            <p class="text-sm font-medium">{{ user.get_full_name|default:user.username }}</p>
+            <p class="text-xs text-muted-foreground">{{ user.email|default:user.username }}</p>
+          </div>
+          <form method="post" action="{% url 'accounts:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="sidebar-user-menu-item w-full text-left">
+              <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+              Log out
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+{# Mobile sidebar #}
+<aside class="admin-sidebar-mobile"
+       x-show="sidebarOpen" x-cloak
+       x-transition:enter="transition ease-out duration-200"
+       x-transition:enter-start="-translate-x-full"
+       x-transition:enter-end="translate-x-0">
+  <div class="sidebar-header">
+    <span class="text-sm font-semibold">HireLens</span>
+  </div>
+  <div class="sidebar-content p-2">
+    <a href="{% url 'admin_panel:job_create' %}" class="sidebar-quick-create mb-2" @click="sidebarOpen = false">Quick Create</a>
+    <a href="{% url 'admin_panel:dashboard' %}" class="sidebar-menu-btn" @click="sidebarOpen = false">Dashboard</a>
+    <a href="{% url 'admin_panel:jobs_list' %}" class="sidebar-menu-btn" @click="sidebarOpen = false">Jobs</a>
+    <div class="mt-4 px-2">{% include "components/_theme_switcher.html" %}</div>
+  </div>
+  <div class="sidebar-footer p-2">
+    <form method="post" action="{% url 'accounts:logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="sidebar-menu-btn w-full">Sign out</button>
+    </form>
+  </div>
+</aside>

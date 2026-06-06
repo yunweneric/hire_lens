@@ -1,0 +1,81 @@
+{% extends "layouts/admin.html" %}
+
+{% block content %}
+<div class="section-cards">
+  {% include "components/_section_card.html" with label="Total applications" value=stats.total_applications trend=trends.applications footer="Applicants across all roles" %}
+  {% include "components/_section_card.html" with label="Published jobs" value=stats.published_jobs trend=trends.jobs footer="Live on public job board" %}
+  {% include "components/_section_card.html" with label="Pending analysis" value=stats.pending_analysis footer="Awaiting AI resume review" %}
+  {% include "components/_section_card.html" with label="Avg match score" value=stats.avg_ats_score suffix="%" trend=trends.analyses footer="Across completed analyses" %}
+</div>
+
+<div class="mt-2">
+  {% include "components/_dashboard_chart.html" with chart_points=chart_points chart_svg=chart_svg total_in_period=chart_total %}
+</div>
+
+<div class="data-table-panel mt-2">
+  <div class="data-table-toolbar">
+    <div>
+      <h2 class="text-base font-semibold">Recent applications</h2>
+      <p class="text-sm text-muted-foreground">Latest candidates who applied to your open roles.</p>
+    </div>
+    <div class="flex gap-2">
+      <a href="{% url 'admin_panel:jobs_list' %}" class="btn-outline btn-sm">All jobs</a>
+      <a href="{% url 'admin_panel:job_create' %}" class="btn-primary btn-sm">Add job</a>
+    </div>
+  </div>
+
+  {% if recent_applications %}
+  <div class="table-wrapper">
+    <table class="table w-full">
+      <thead class="table-header">
+        <tr>
+          <th class="table-head-cell w-12 text-muted-foreground">#</th>
+          <th class="table-head-cell">Candidate</th>
+          <th class="table-head-cell">Job</th>
+          <th class="table-head-cell">Applied</th>
+          <th class="table-head-cell">Status</th>
+          <th class="table-head-cell text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for app in recent_applications %}
+        <tr class="table-row">
+          <td class="table-cell text-muted-foreground tabular-nums">{{ forloop.counter }}</td>
+          <td class="table-cell">
+            <div class="flex items-center gap-3">
+              <div class="avatar">
+                <div class="avatar-fallback">{{ app.full_name|slice:":1"|upper }}</div>
+              </div>
+              <div>
+                <p class="font-medium leading-none">{{ app.full_name }}</p>
+                <p class="mt-1 text-xs text-muted-foreground">{{ app.email }}</p>
+              </div>
+            </div>
+          </td>
+          <td class="table-cell text-muted-foreground">{{ app.job.title }}</td>
+          <td class="table-cell text-muted-foreground tabular-nums">{{ app.created_at|date:"M j, Y" }}</td>
+          <td class="table-cell">
+            {% if app.analysis %}
+              <span class="badge-success">{{ app.analysis.ats_score|floatformat:0 }}% match</span>
+            {% else %}
+              <span class="badge-warning">Pending</span>
+            {% endif %}
+          </td>
+          <td class="table-cell text-right">
+            <a href="{% url 'admin_panel:application_detail' pk=app.pk %}" class="btn-ghost btn-sm">View</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="px-6 py-12">
+    {% include "components/_empty_state.html" with title="No applications yet" description="Publish a job on the public board to start receiving applications." %}
+    <div class="mt-4 text-center">
+      <a href="{% url 'admin_panel:job_create' %}" class="btn-primary">Create a job</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

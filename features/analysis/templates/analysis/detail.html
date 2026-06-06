@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis{% endblock %}
+
+{% block content %}
+{% include "components/_page_header.html" with page_heading=candidate_name page_description=job_title %}
+
+<div class="grid gap-8 lg:grid-cols-[220px_1fr]">
+  <div>
+    {% include "components/_score_ring.html" with score=ats_score label="ATS score" score_label=score_label %}
+  </div>
+
+  <div class="flex flex-col gap-6">
+    <section class="rounded-lg border bg-card p-5">
+      <h2 class="text-sm font-medium">Summary</h2>
+      <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{{ ai_summary }}</p>
+      <dl class="mt-4 flex gap-8 text-sm">
+        <div>
+          <dt class="text-muted-foreground">Skill match</dt>
+          <dd class="mt-0.5 font-medium tabular-nums">{{ skill_match_pct|default:"75" }}%</dd>
+        </div>
+        <div>
+          <dt class="text-muted-foreground">Confidence</dt>
+          <dd class="mt-0.5 font-medium tabular-nums">{{ ai_confidence|default:"0.91" }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    {% include "components/_skill_tags.html" with matched=matched_skills missing=missing_skills %}
+    {% include "components/_suggestion_list.html" with suggestions=suggestions %}
+  </div>
+</div>
+{% endblock %}

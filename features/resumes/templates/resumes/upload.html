@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Resume{% endblock %}
+
+{% block content %}
+{% include "components/_page_header.html" with page_heading="Upload resume" page_description="PDF or DOCX, max 5MB." %}
+
+<div class="mx-auto max-w-lg">
+  <form method="post" enctype="multipart/form-data" class="flex flex-col gap-6">
+    {% csrf_token %}
+    {% if form.errors %}
+    {% include "components/_alert.html" with variant="destructive" message=form.errors %}
+    {% endif %}
+
+    {% include "components/_upload_dropzone.html" %}
+
+    <div class="flex flex-col gap-2">
+      <label for="candidate_name" class="label">Candidate name <span class="font-normal text-muted-foreground">(optional)</span></label>
+      <input type="text" id="candidate_name" name="candidate_name" placeholder="Jane Doe" class="input">
+    </div>
+
+    <button type="submit" class="btn-primary">Upload</button>
+  </form>
+</div>
+{% endblock %}

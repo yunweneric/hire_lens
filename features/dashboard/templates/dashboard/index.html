@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+{% include "components/_page_header.html" with page_heading="Dashboard" page_description="Overview of your hiring pipeline." %}
+
+<div class="flex flex-col gap-8">
+  <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    {% include "components/_stat_card.html" with label="Resumes" value=stats.total_resumes %}
+    {% include "components/_stat_card.html" with label="Avg ATS score" value=stats.avg_ats_score %}
+    {% include "components/_stat_card.html" with label="Jobs" value=stats.total_jobs %}
+    {% include "components/_stat_card.html" with label="Top candidates" value=stats.top_candidates %}
+  </div>
+
+  <div class="grid gap-8 lg:grid-cols-2">
+    <section class="rounded-lg border bg-card p-5">
+      <h2 class="text-sm font-medium">Uploads</h2>
+      <p class="mt-1 text-xs text-muted-foreground">Last 6 months</p>
+      <div class="mt-6 flex items-end gap-2">
+        {% for h in resume_trends %}
+        <div class="flex-1 rounded-sm bg-primary/15" style="height: {{ h }}px; min-height: 8px;"></div>
+        {% endfor %}
+      </div>
+      <div class="mt-3 flex justify-between text-xs text-muted-foreground">
+        <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span>
+      </div>
+    </section>
+
+    <section class="rounded-lg border bg-card p-5">
+      <h2 class="text-sm font-medium">Top skills</h2>
+      <p class="mt-1 text-xs text-muted-foreground">Match rate across candidates</p>
+      <ul class="mt-6 flex flex-col gap-4">
+        {% for row in skill_trends %}
+        <li>
+          <div class="flex justify-between text-sm">
+            <span>{{ row.name }}</span>
+            <span class="text-muted-foreground">{{ row.match_pct }}%</span>
+          </div>
+          <div class="mt-2 h-1.5 rounded-full bg-muted">
+            <div class="h-1.5 rounded-full bg-primary" style="width: {{ row.match_pct }}%;"></div>
+          </div>
+        </li>
+        {% empty %}
+        <li class="text-sm text-muted-foreground">No data yet.</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+
+  <section class="rounded-lg border bg-card">
+    <div class="border-b px-5 py-4">
+      <h2 class="text-sm font-medium">Recent uploads</h2>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b text-left text-xs text-muted-foreground">
+            <th class="w-12 px-5 py-3 font-medium">#</th>
+            <th class="px-5 py-3 font-medium">Candidate</th>
+            <th class="px-5 py-3 font-medium">Role</th>
+            <th class="px-5 py-3 font-medium">Score</th>
+            <th class="px-5 py-3 font-medium">Status</th>
+            <th class="px-5 py-3 font-medium">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in recent_upload_rows %}
+          <tr class="border-b last:border-0">
+            <td class="px-5 py-3 text-muted-foreground tabular-nums">{{ forloop.counter }}</td>
+            <td class="px-5 py-3 font-medium">{{ row.candidate_name }}</td>
+            <td class="px-5 py-3 text-muted-foreground">{{ row.applied_position }}</td>
+            <td class="px-5 py-3 tabular-nums">{{ row.ats_score|floatformat:0 }}</td>
+            <td class="px-5 py-3">
+              <span class="{{ row.badge_class }}">{{ row.status }}</span>
+            </td>
+            <td class="px-5 py-3 text-muted-foreground">{{ row.date|date:"M j, Y" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="px-5 py-10 text-center text-muted-foreground">No uploads yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

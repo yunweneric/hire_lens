@@ -1,0 +1,44 @@
+{% extends "layouts/admin.html" %}
+
+{% block content %}
+<div>
+  <a href="{% url 'admin_panel:job_applicants' job_id=job.pk %}" class="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
+    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Applicants
+  </a>
+  <h1 class="mt-3 text-xl font-semibold tracking-tight">{{ job.title }} — rankings</h1>
+  <p class="mt-1 text-sm text-muted-foreground">Candidates ranked by AI match score. The top match is your best fit for this role.</p>
+</div>
+
+{% if analyses %}
+<ol class="space-y-3">
+  {% for analysis in analyses %}
+  <li class="surface flex items-center gap-4 p-4 {% if forloop.first %}ring-2 ring-brand/40{% endif %}">
+    <span class="flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold {% if forloop.first %}bg-brand text-brand-foreground{% else %}bg-muted text-muted-foreground{% endif %}">
+      {{ forloop.counter }}
+    </span>
+    <div class="min-w-0 flex-1">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="font-medium">{% if analysis.application %}{{ analysis.application.full_name }}{% else %}{{ analysis.resume.candidate_name }}{% endif %}</span>
+        {% if forloop.first %}<span class="badge-success">Best match</span>{% endif %}
+        {% if analysis.recommendation %}<span class="badge-secondary">{{ analysis.recommendation }}</span>{% endif %}
+      </div>
+      <p class="mt-0.5 line-clamp-1 text-sm text-muted-foreground">{{ analysis.ai_summary|truncatewords:24 }}</p>
+    </div>
+    <div class="text-right">
+      <span class="text-2xl font-bold tabular-nums">{{ analysis.ats_score|floatformat:0 }}</span>
+      <span class="text-sm text-muted-foreground">/ 100</span>
+    </div>
+    {% if analysis.application %}
+    <a href="{% url 'admin_panel:application_detail' pk=analysis.application.pk %}" class="btn-ghost btn-sm shrink-0">View</a>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ol>
+{% else %}
+  {% include "components/_empty_state.html" with title="No rankings yet" description="Run AI analysis on applicants to see ranked matches." %}
+  <div class="mt-4 text-center">
+    <a href="{% url 'admin_panel:job_applicants' job_id=job.pk %}" class="btn-primary">View applicants</a>
+  </div>
+{% endif %}
+{% endblock %}

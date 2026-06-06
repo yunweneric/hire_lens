@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en"
+      x-data="{
+        dark: localStorage.getItem('theme') === 'dark',
+        sidebarOpen: false,
+        toggleTheme() {
+          this.dark = !this.dark;
+          localStorage.setItem('theme', this.dark ? 'dark' : 'light');
+        }
+      }"
+      x-init="if (dark) document.documentElement.classList.add('dark')"
+      :class="{ 'dark': dark }">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ page_title|default:"Admin" }}{% endblock %} | HireLens</title>
+  <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'dist/output.css' %}">
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen bg-background text-foreground antialiased">
+  {% if user.is_authenticated %}
+    <div class="flex min-h-screen">
+      {% include "components/_sidebar.html" %}
+
+      <div class="flex min-w-0 flex-1 flex-col lg:pl-56">
+        {% include "components/_topbar.html" %}
+
+        <main class="flex-1 px-4 py-8 sm:px-8">
+          <div class="mx-auto max-w-5xl">
+            {% include "components/_messages.html" %}
+            {% block content %}{% endblock %}
+          </div>
+        </main>
+      </div>
+
+      <div x-show="sidebarOpen" x-cloak @click="sidebarOpen = false"
+           class="fixed inset-0 z-40 bg-background/60 lg:hidden"></div>
+    </div>
+  {% else %}
+    <main class="min-h-screen">
+      {% block auth_content %}{% endblock %}
+    </main>
+  {% endif %}
+
+  <style>[x-cloak] { display: none !important; }</style>
+</body>
+</html>

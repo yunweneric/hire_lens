@@ -1,0 +1,9 @@
+<div class="avatar">
+  {% if src %}
+  <img src="{{ src }}" alt="{{ alt|default:'' }}" class="aspect-square size-full object-cover" />
+  {% else %}
+  <div class="avatar-fallback {% if primary %}bg-primary text-primary-foreground{% endif %}">
+    {{ fallback }}
+  </div>
+  {% endif %}
+</div>

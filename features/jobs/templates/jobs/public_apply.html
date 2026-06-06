@@ -1,0 +1,78 @@
+{% extends "layouts/public.html" %}
+
+{% block content %}
+<nav class="mb-6 text-sm">
+  <a href="{% url 'jobs:public_detail' slug=job.slug %}" class="inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground">
+    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Back to {{ job.title }}
+  </a>
+</nav>
+
+<div class="grid items-start gap-8 lg:grid-cols-[1fr_18rem]">
+  {# Application card — left column, aligned to the navbar edge #}
+  <div class="surface min-w-0 overflow-hidden">
+    <div class="border-b px-6 py-5">
+      <h1 class="text-xl font-bold tracking-tight">Apply for {{ job.title }}</h1>
+      <p class="mt-1 text-sm text-muted-foreground">Fill in your details and attach your resume.</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-5 p-6">
+      {% csrf_token %}
+      <div class="grid gap-5 sm:grid-cols-2">
+        <div class="field">
+          <label for="{{ form.full_name.id_for_label }}" class="field-label">Full name</label>
+          {{ form.full_name }}
+          {% if form.full_name.errors %}<p class="field-error">{{ form.full_name.errors.0 }}</p>{% endif %}
+        </div>
+        <div class="field">
+          <label for="{{ form.email.id_for_label }}" class="field-label">Email</label>
+          {{ form.email }}
+          {% if form.email.errors %}<p class="field-error">{{ form.email.errors.0 }}</p>{% endif %}
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="{{ form.phone.id_for_label }}" class="field-label">Phone <span class="font-normal text-muted-foreground">(optional)</span></label>
+        {{ form.phone }}
+        {% if form.phone.errors %}<p class="field-error">{{ form.phone.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div class="field">
+        <label for="{{ form.resume.id_for_label }}" class="field-label">Resume</label>
+        {{ form.resume }}
+        <p class="field-hint">PDF or DOCX, up to 5 MB.</p>
+        {% if form.resume.errors %}<p class="field-error">{{ form.resume.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div class="field">
+        <label for="{{ form.cover_letter.id_for_label }}" class="field-label">Cover letter <span class="font-normal text-muted-foreground">(optional)</span></label>
+        {{ form.cover_letter }}
+        {% if form.cover_letter.errors %}<p class="field-error">{{ form.cover_letter.errors.0 }}</p>{% endif %}
+      </div>
+
+      <button type="submit" class="btn-brand w-full">Submit application</button>
+    </form>
+  </div>
+
+  {# What happens next — restored to the right column #}
+  <aside class="lg:sticky lg:top-24 lg:self-start">
+    <div class="surface p-5">
+      <h2 class="text-sm font-semibold">What happens next</h2>
+      <ol class="mt-4 space-y-4 text-sm">
+        <li class="flex gap-3">
+          <span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-semibold text-brand">1</span>
+          <span class="text-muted-foreground">We review your resume against the role.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-semibold text-brand">2</span>
+          <span class="text-muted-foreground">Our AI highlights your strongest matches.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-brand/10 text-xs font-semibold text-brand">3</span>
+          <span class="text-muted-foreground">We reach out if there's a fit.</span>
+        </li>
+      </ol>
+    </div>
+  </aside>
+</div>
+{% endblock %}

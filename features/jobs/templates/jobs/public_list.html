@@ -1,0 +1,41 @@
+{% extends "layouts/public.html" %}
+
+{% block full_content %}
+<section class="relative overflow-hidden border-b border-border/60 bg-muted/30">
+  <div aria-hidden="true" class="pointer-events-none absolute inset-0">
+    <div class="absolute -top-24 left-1/2 size-[36rem] -translate-x-1/2 rounded-full bg-brand/10 blur-3xl"></div>
+  </div>
+  <div class="container-page relative py-16 text-center sm:py-20">
+    <span class="eyebrow mx-auto">
+      <span class="size-1.5 rounded-full bg-brand"></span>
+      AI-powered candidate matching
+    </span>
+    <h1 class="mx-auto mt-6 max-w-3xl text-4xl font-extrabold tracking-tight sm:text-5xl">
+      Find your next role at HireLens
+    </h1>
+    <p class="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
+      Browse open positions and apply in minutes. Our team reviews every application carefully.
+    </p>
+    <div class="mt-8 flex items-center justify-center gap-3 text-sm text-muted-foreground">
+      <span class="chip-brand">{{ jobs|length }} open position{{ jobs|length|pluralize }}</span>
+    </div>
+  </div>
+</section>
+
+<div class="container-page py-12">
+  {% include "components/_messages.html" %}
+
+  {% if jobs %}
+    <div class="mb-6 flex items-center justify-between">
+      <h2 class="text-lg font-semibold tracking-tight">Open positions</h2>
+    </div>
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {% for job in jobs %}
+        {% include "components/_job_card.html" %}
+      {% endfor %}
+    </div>
+  {% else %}
+    {% include "components/_empty_state.html" with title="No open positions" description="There are no roles open right now. Check back soon for new opportunities." %}
+  {% endif %}
+</div>
+{% endblock %}

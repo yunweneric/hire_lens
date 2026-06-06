@@ -1,0 +1,160 @@
+{% extends "layouts/admin.html" %}
+
+{% block content %}
+<div>
+  <a href="{% url 'admin_panel:job_applicants' job_id=application.job_id %}" class="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
+    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Applicants for {{ application.job.title }}
+  </a>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-[20rem_1fr]">
+  {# Candidate profile #}
+  <section class="space-y-6">
+    <div class="surface p-6">
+      <div class="flex items-center gap-3">
+        <span class="flex size-12 items-center justify-center rounded-full bg-brand/10 text-base font-semibold text-brand">
+          {{ application.full_name|slice:":1"|upper }}
+        </span>
+        <div class="min-w-0">
+          <h2 class="truncate text-lg font-semibold">{{ application.full_name }}</h2>
+          <p class="truncate text-sm text-muted-foreground">{{ application.job.title }}</p>
+        </div>
+      </div>
+
+      <dl class="mt-6 space-y-4 text-sm">
+        <div>
+          <dt class="dt">Email</dt>
+          <dd class="mt-0.5"><a href="mailto:{{ application.email }}" class="link-brand">{{ application.email }}</a></dd>
+        </div>
+        {% if application.phone %}
+        <div>
+          <dt class="dt">Phone</dt>
+          <dd class="mt-0.5">{{ application.phone }}</dd>
+        </div>
+        {% endif %}
+        <div>
+          <dt class="dt">Applied</dt>
+          <dd class="mt-0.5">{{ application.created_at|date:"F j, Y · g:i A" }}</dd>
+        </div>
+      </dl>
+
+      <div class="mt-6 flex flex-col gap-2 border-t pt-4">
+        <a href="{% url 'admin_panel:application_resume' pk=application.pk %}" class="btn-outline btn-sm w-full">
+          <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Download resume
+        </a>
+      </div>
+    </div>
+
+    {% if application.cover_letter %}
+    <div class="surface p-6">
+      <h3 class="dt">Cover letter</h3>
+      <p class="mt-3 whitespace-pre-wrap text-sm leading-relaxed">{{ application.cover_letter }}</p>
+    </div>
+    {% endif %}
+  </section>
+
+  {# AI review #}
+  <section>
+    {% if analysis %}
+    <div class="surface overflow-hidden">
+      <div class="flex flex-wrap items-start justify-between gap-6 border-b bg-muted/30 p-6">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="flex size-7 items-center justify-center rounded-md bg-brand/10 text-brand">
+              <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </span>
+            <h2 class="text-lg font-semibold">AI match review</h2>
+          </div>
+          {% if analysis.recommendation %}
+          <span class="badge-default mt-3">{{ analysis.recommendation }}</span>
+          {% endif %}
+        </div>
+        <div class="text-right">
+          <div class="text-4xl font-bold tabular-nums">{{ analysis.ats_score|floatformat:0 }}<span class="text-lg text-muted-foreground">/100</span></div>
+          <p class="text-xs text-muted-foreground">{{ analysis.score_label }}</p>
+        </div>
+      </div>
+
+      <div class="space-y-6 p-6">
+        <p class="text-sm leading-relaxed text-muted-foreground">{{ analysis.ai_summary }}</p>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="rounded-lg border bg-muted/20 p-4">
+            <h3 class="flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+              <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Matched skills
+            </h3>
+            <div class="mt-3 flex flex-wrap gap-1.5">
+              {% for skill in analysis.matched_skills %}
+              <span class="badge-success">{{ skill }}</span>
+              {% empty %}
+              <span class="text-sm text-muted-foreground">None detected</span>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="rounded-lg border bg-muted/20 p-4">
+            <h3 class="flex items-center gap-1.5 text-sm font-medium text-destructive">
+              <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              Missing skills
+            </h3>
+            <div class="mt-3 flex flex-wrap gap-1.5">
+              {% for skill in analysis.missing_skills %}
+              <span class="badge-destructive">{{ skill }}</span>
+              {% empty %}
+              <span class="text-sm text-muted-foreground">None</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        {% if analysis.suggestions %}
+        <div>
+          <h3 class="text-sm font-medium">Recommendations</h3>
+          <ol class="mt-3 space-y-2">
+            {% for suggestion in analysis.suggestions %}
+            <li class="flex gap-3 text-sm text-muted-foreground">
+              <span class="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground">{{ forloop.counter }}</span>
+              <span>{{ suggestion }}</span>
+            </li>
+            {% endfor %}
+          </ol>
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'admin_panel:application_analyze' pk=application.pk %}" class="border-t pt-4" x-data="{ loading: false }" @submit="loading = true">
+          {% csrf_token %}
+          <button type="submit" class="btn-secondary btn-sm" :disabled="loading" :aria-busy="loading">
+            <svg x-show="loading" x-cloak class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            <span x-text="loading ? 'Analyzing…' : 'Re-run analysis'">Re-run analysis</span>
+          </button>
+        </form>
+      </div>
+    </div>
+    {% else %}
+    <div class="surface flex flex-col items-center justify-center p-12 text-center">
+      <div class="mb-4 flex size-12 items-center justify-center rounded-full bg-brand/10 text-brand">
+        <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <h2 class="text-lg font-semibold">Analyze this candidate</h2>
+      <p class="mt-1 max-w-sm text-sm text-muted-foreground">Run AI resume analysis to score this applicant against the role and surface matched and missing skills.</p>
+      <form method="post" action="{% url 'admin_panel:application_analyze' pk=application.pk %}" class="mt-6" x-data="{ loading: false }" @submit="loading = true">
+        {% csrf_token %}
+        <button type="submit" class="btn-brand" :disabled="loading" :aria-busy="loading">
+          <svg x-show="!loading" class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <svg x-show="loading" x-cloak class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          <span x-text="loading ? 'Analyzing…' : 'Analyze with AI'">Analyze with AI</span>
+        </button>
+      </form>
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

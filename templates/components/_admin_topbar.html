@@ -1,0 +1,15 @@
+<header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background/95 px-4 backdrop-blur sm:px-8">
+  <button type="button" @click="sidebarOpen = true" class="btn-ghost btn-sm lg:hidden" aria-label="Open menu">
+    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <div class="hidden flex-1 lg:block">
+    <h1 class="text-sm font-medium text-muted-foreground">{{ page_title|default:"Admin" }}</h1>
+  </div>
+  <div class="flex items-center gap-3">
+    <span class="hidden text-sm text-muted-foreground sm:inline">{{ user.get_full_name|default:user.username }}</span>
+    <form method="post" action="{% url 'accounts:logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn-ghost btn-sm">Sign out</button>
+    </form>
+  </div>
+</header>
