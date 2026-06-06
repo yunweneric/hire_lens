@@ -6,9 +6,15 @@ from core.models import TimestampedModel
 class Application(TimestampedModel):
     STATUS_SUBMITTED = "submitted"
     STATUS_REVIEWED = "reviewed"
+    STATUS_SHORTLISTED = "shortlisted"
+    STATUS_INTERVIEW = "interview"
+    STATUS_REJECTED = "rejected"
     STATUS_CHOICES = [
         (STATUS_SUBMITTED, "Submitted"),
         (STATUS_REVIEWED, "Reviewed"),
+        (STATUS_SHORTLISTED, "Shortlisted"),
+        (STATUS_INTERVIEW, "Interview"),
+        (STATUS_REJECTED, "Rejected"),
     ]
 
     job = models.ForeignKey(

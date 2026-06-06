@@ -13,14 +13,14 @@
 {% if analyses %}
 <ol class="space-y-3">
   {% for analysis in analyses %}
-  <li class="surface flex items-center gap-4 p-4 {% if forloop.first %}ring-2 ring-brand/40{% endif %}">
-    <span class="flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold {% if forloop.first %}bg-brand text-brand-foreground{% else %}bg-muted text-muted-foreground{% endif %}">
-      {{ forloop.counter }}
+  <li class="surface flex items-center gap-4 p-4 {% if page_obj.number == 1 and forloop.first %}ring-2 ring-brand/40{% endif %}">
+    <span class="flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold {% if page_obj.number == 1 and forloop.first %}bg-brand text-brand-foreground{% else %}bg-muted text-muted-foreground{% endif %}">
+      {{ page_obj.start_index|add:forloop.counter0 }}
     </span>
     <div class="min-w-0 flex-1">
       <div class="flex flex-wrap items-center gap-2">
         <span class="font-medium">{% if analysis.application %}{{ analysis.application.full_name }}{% else %}{{ analysis.resume.candidate_name }}{% endif %}</span>
-        {% if forloop.first %}<span class="badge-success">Best match</span>{% endif %}
+        {% if page_obj.number == 1 and forloop.first %}<span class="badge-success">Best match</span>{% endif %}
         {% if analysis.recommendation %}<span class="badge-secondary">{{ analysis.recommendation }}</span>{% endif %}
       </div>
       <p class="mt-0.5 line-clamp-1 text-sm text-muted-foreground">{{ analysis.ai_summary|truncatewords:24 }}</p>
@@ -35,6 +35,7 @@
   </li>
   {% endfor %}
 </ol>
+{% include "components/_pagination.html" %}
 {% else %}
   {% include "components/_empty_state.html" with title="No rankings yet" description="Run AI analysis on applicants to see ranked matches." %}
   <div class="mt-4 text-center">

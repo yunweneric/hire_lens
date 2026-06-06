@@ -33,7 +33,7 @@
     <tbody>
       {% for app in applications %}
       <tr class="table-row">
-        <td class="table-cell text-muted-foreground tabular-nums">{{ forloop.counter }}</td>
+        <td class="table-cell text-muted-foreground tabular-nums">{{ page_obj.start_index|add:forloop.counter0 }}</td>
         <td class="table-cell font-medium">{{ app.full_name }}</td>
         <td class="table-cell text-muted-foreground">{{ app.email }}</td>
         <td class="table-cell text-muted-foreground">{{ app.created_at|date:"M j, Y" }}</td>
@@ -59,6 +59,7 @@
     </tbody>
   </table>
   </div>
+  {% include "components/_pagination.html" %}
 {% else %}
   <div class="px-6 py-12">
   {% include "components/_empty_state.html" with title="No applicants yet" description="Applications will appear here once candidates apply on the public job board." %}

@@ -1,0 +1,12 @@
+{# Application status badge. Params: status (machine value), label (display) #}
+{% if status == "shortlisted" %}
+  <span class="badge-success">{{ label }}</span>
+{% elif status == "interview" %}
+  <span class="badge-warning">{{ label }}</span>
+{% elif status == "rejected" %}
+  <span class="badge-destructive">{{ label }}</span>
+{% elif status == "reviewed" %}
+  <span class="badge-secondary">{{ label }}</span>
+{% else %}
+  <span class="badge-outline">{{ label }}</span>
+{% endif %}

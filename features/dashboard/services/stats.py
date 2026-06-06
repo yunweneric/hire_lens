@@ -146,5 +146,11 @@ class DashboardService:
             .order_by("-created_at")[:limit]
         )
 
+    def get_recent_jobs(self, limit: int = 10) -> list:
+        return list(
+            JobDescription.objects.annotate(application_count=Count("applications"))
+            .order_by("-created_at")[:limit]
+        )
+
 
 dashboard_service = DashboardService()

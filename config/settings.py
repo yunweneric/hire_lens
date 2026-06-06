@@ -128,3 +128,19 @@ GEMINI_MODEL = env("GEMINI_MODEL", default="gemini-2.0-flash")
 # File upload
 MAX_RESUME_SIZE_MB = 5
 ALLOWED_RESUME_EXTENSIONS = [".pdf", ".docx"]
+
+# Email
+# Dev defaults to the console backend (emails print to stdout). For production,
+# set EMAIL_HOST/EMAIL_HOST_USER/EMAIL_HOST_PASSWORD and switch the backend.
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND",
+    default="django.core.mail.backends.console.EmailBackend",
+)
+EMAIL_HOST = env("EMAIL_HOST", default="")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="HireLens <no-reply@hirelens.local>")
+# Toggle candidate status-change emails on/off
+SEND_APPLICATION_EMAILS = env.bool("SEND_APPLICATION_EMAILS", default=True)

@@ -37,6 +37,23 @@ Full setup: **[docs/setup/installation.md](docs/setup/installation.md)**
 | `/api/jobs/<job_id>/rankings/` | GET | Ranked matches for a job |
 | `/api/admin/dashboard/stats/` | GET | Dashboard metrics |
 
+## Deployment
+
+Production runs on Ubuntu behind **Nginx + Gunicorn** with **PostgreSQL** and a Let's Encrypt SSL certificate.
+
+```bash
+# On the server, after the initial setup:
+cd /var/www/hirelens
+git pull
+sudo ./deploy/redeploy.sh
+```
+
+[deploy/redeploy.sh](deploy/redeploy.sh) pulls the latest code, installs dependencies, rebuilds the Tailwind CSS, runs migrations, collects static files, and restarts Gunicorn + Nginx. Override defaults with env vars (`APP_DIR`, `SERVICE`, `BRANCH`, `SKIP_GIT=1`, `SKIP_NPM=1`).
+
+> With `DEBUG=False`, the app forces HTTPS, so a valid SSL certificate must be in place before it's reachable. Set production `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` in the server `.env`.
+
+Full guide: **[docs/deployment/production.md](docs/deployment/production.md)**
+
 ## Documentation
 
 See **[docs/](docs/README.md)** for architecture, data model, and design system.

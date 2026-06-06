@@ -17,13 +17,40 @@
       Browse open positions and apply in minutes. Our team reviews every application carefully.
     </p>
     <div class="mt-8 flex items-center justify-center gap-3 text-sm text-muted-foreground">
-      <span class="chip-brand">{{ jobs|length }} open position{{ jobs|length|pluralize }}</span>
+      <span class="chip-brand">{{ page_obj.paginator.count }} open position{{ page_obj.paginator.count|pluralize }}</span>
     </div>
   </div>
 </section>
 
 <div class="container-page py-12">
   {% include "components/_messages.html" %}
+
+  {% if skills or filters.q or filters.skill %}
+  <form method="get" class="mb-8 flex flex-wrap items-end gap-3">
+    <div class="field min-w-56 flex-1">
+      <label for="q" class="field-label">Search</label>
+      <input type="search" id="q" name="q" value="{{ filters.q }}"
+             placeholder="Search by title or keyword" class="input" />
+    </div>
+    {% if skills %}
+    <div class="field">
+      <label for="skill" class="field-label">Skill</label>
+      <select id="skill" name="skill" class="input">
+        <option value="">All skills</option>
+        {% for s in skills %}
+        <option value="{{ s }}" {% if filters.skill == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+    <div class="flex gap-2">
+      <button type="submit" class="btn-primary btn-sm">Search</button>
+      {% if filters.q or filters.skill %}
+      <a href="{% url 'jobs:public_list' %}" class="btn-ghost btn-sm">Clear</a>
+      {% endif %}
+    </div>
+  </form>
+  {% endif %}
 
   {% if jobs %}
     <div class="mb-6 flex items-center justify-between">
@@ -34,6 +61,13 @@
         {% include "components/_job_card.html" %}
       {% endfor %}
     </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="mt-8 flex justify-center">
+      {% include "components/_pagination.html" %}
+    </div>
+    {% endif %}
+  {% elif filters.q or filters.skill %}
+    {% include "components/_empty_state.html" with title="No matching roles" description="No open positions match your search. Try different keywords or clear the filters." %}
   {% else %}
     {% include "components/_empty_state.html" with title="No open positions" description="There are no roles open right now. Check back soon for new opportunities." %}
   {% endif %}

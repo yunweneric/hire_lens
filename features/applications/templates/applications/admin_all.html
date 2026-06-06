@@ -1,0 +1,151 @@
+{% extends "layouts/admin.html" %}
+
+{% block content %}
+<div class="section-cards">
+  {% include "components/_section_card.html" with label="Total applications" value=counters.total footer="Across all roles" %}
+  {% include "components/_section_card.html" with label="Analyzed" value=counters.analyzed footer="AI resume review complete" %}
+  {% include "components/_section_card.html" with label="Pending analysis" value=counters.pending footer="Awaiting AI review" %}
+  {% include "components/_section_card.html" with label="Reviewed" value=counters.reviewed footer="Marked as reviewed" %}
+</div>
+
+<div class="data-table-panel mt-2">
+  <div class="data-table-toolbar">
+    <div>
+      <h2 class="text-base font-semibold">All applications</h2>
+      <p class="text-sm text-muted-foreground">Every candidate who applied across your job postings.</p>
+    </div>
+    <a href="{% url 'admin_panel:jobs_list' %}" class="btn-outline btn-sm">All jobs</a>
+  </div>
+
+  {# Search + filters #}
+  <form method="get" class="flex flex-wrap items-end gap-2 border-b px-4 py-3">
+    <div class="field min-w-48 flex-1">
+      <label for="q" class="field-label">Search</label>
+      <input type="search" id="q" name="q" value="{{ filters.q }}"
+             placeholder="Name or email" class="input" />
+    </div>
+    <div class="field">
+      <label for="job" class="field-label">Job</label>
+      <select id="job" name="job" class="input">
+        <option value="">All jobs</option>
+        {% for job in jobs %}
+        <option value="{{ job.pk }}" {% if filters.job == job.pk|stringformat:"s" %}selected{% endif %}>{{ job.title }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="status" class="field-label">Status</label>
+      <select id="status" name="status" class="input">
+        <option value="">All statuses</option>
+        {% for value, label in status_choices %}
+        <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="analysis" class="field-label">Analysis</label>
+      <select id="analysis" name="analysis" class="input">
+        <option value="">Any</option>
+        <option value="analyzed" {% if filters.analysis == "analyzed" %}selected{% endif %}>Analyzed</option>
+        <option value="pending" {% if filters.analysis == "pending" %}selected{% endif %}>Pending</option>
+      </select>
+    </div>
+    <div class="flex gap-2">
+      <button type="submit" class="btn-primary btn-sm">Filter</button>
+      <a href="{% url 'admin_panel:applications_list' %}" class="btn-ghost btn-sm">Clear</a>
+    </div>
+  </form>
+
+{% if applications %}
+  <div class="table-wrapper">
+  <table class="table w-full">
+    <thead class="table-header">
+      <tr>
+        <th class="table-head-cell w-12 text-muted-foreground">#</th>
+        <th class="table-head-cell">Candidate</th>
+        <th class="table-head-cell">Job</th>
+        <th class="table-head-cell">Applied</th>
+        <th class="table-head-cell">Status</th>
+        <th class="table-head-cell">Match</th>
+        <th class="table-head-cell text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for app in applications %}
+      <tr class="table-row">
+        <td class="table-cell text-muted-foreground tabular-nums">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+        <td class="table-cell">
+          <div class="flex items-center gap-3">
+            <div class="avatar">
+              <div class="avatar-fallback">{{ app.full_name|slice:":1"|upper }}</div>
+            </div>
+            <div>
+              <p class="font-medium leading-none">{{ app.full_name }}</p>
+              <p class="mt-1 text-xs text-muted-foreground">{{ app.email }}</p>
+            </div>
+          </div>
+        </td>
+        <td class="table-cell text-muted-foreground">{{ app.job.title }}</td>
+        <td class="table-cell text-muted-foreground tabular-nums">{{ app.created_at|date:"M j, Y" }}</td>
+        <td class="table-cell">
+          {% include "components/_status_badge.html" with status=app.status label=app.get_status_display %}
+        </td>
+        <td class="table-cell">
+          {% if app.analysis %}
+            <span class="badge-success">{{ app.analysis.ats_score|floatformat:0 }}%</span>
+          {% else %}
+            <span class="text-muted-foreground">—</span>
+          {% endif %}
+        </td>
+        <td class="table-cell text-right">
+          <div class="relative inline-block text-left" x-data="{ open: false }">
+            <button type="button"
+                    @click="open = !open"
+                    @click.outside="open = false"
+                    @keydown.escape.window="open = false"
+                    class="btn-ghost btn-icon"
+                    aria-haspopup="true"
+                    :aria-expanded="open"
+                    aria-label="Application actions">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="5" cy="12" r="1"></circle>
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="19" cy="12" r="1"></circle>
+              </svg>
+            </button>
+            <div x-show="open" x-cloak x-transition.origin.top.right class="dropdown-menu w-52">
+              <a href="{% url 'admin_panel:application_detail' pk=app.pk %}" class="dropdown-item">View details</a>
+              <a href="{% url 'admin_panel:application_resume' pk=app.pk %}" class="dropdown-item">Download resume</a>
+              <div class="my-1 border-t"></div>
+              <p class="px-3 py-1 text-xs font-medium text-muted-foreground">Set status</p>
+              {% for value, label in status_choices %}
+              <form method="post" action="{% url 'admin_panel:application_set_status' pk=app.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="{{ value }}" />
+                <button type="submit" class="dropdown-item {% if app.status == value %}font-semibold text-foreground{% endif %}">
+                  {% if app.status == value %}
+                  <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  {% else %}
+                  <span class="size-4"></span>
+                  {% endif %}
+                  {{ label }}
+                </button>
+              </form>
+              {% endfor %}
+            </div>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% include "components/_pagination.html" %}
+{% else %}
+  <div class="px-6 py-12">
+  {% include "components/_empty_state.html" with title="No applications found" description="Try adjusting your search or filters." %}
+  </div>
+{% endif %}
+</div>
+{% endblock %}

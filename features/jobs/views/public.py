@@ -3,17 +3,28 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
 from core.utils.markdown import render_markdown
+from core.utils.pagination import paginate
 from features.applications.forms import ApplicationForm
 from features.applications.services import application_service
 from features.jobs.services import job_service
 
 
 def public_job_list(request):
-    jobs = job_service.list_published()
+    query = request.GET.get("q", "").strip()
+    skill = request.GET.get("skill", "").strip()
+
+    jobs = job_service.search_published(query=query, skill=skill)
+    page_obj = paginate(request, jobs)
     return render(
         request,
         "jobs/public_list.html",
-        {"jobs": jobs, "page_title": "Open Positions"},
+        {
+            "jobs": page_obj,
+            "page_obj": page_obj,
+            "skills": job_service.published_skills(),
+            "filters": {"q": query, "skill": skill},
+            "page_title": "Open Positions",
+        },
     )
 
 

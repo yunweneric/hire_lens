@@ -7,17 +7,19 @@ from django.views.decorators.http import require_http_methods
 
 from core.permissions import admin_required
 from core.utils.markdown import render_markdown
+from core.utils.pagination import paginate
 from features.jobs.forms import JobDescriptionForm
 from features.jobs.services import job_service
 
 
 @admin_required
 def admin_jobs_list(request):
-    jobs = job_service.list_all()
+    page_obj = paginate(request, job_service.list_all())
+    counters = job_service.get_admin_counters()
     return render(
         request,
         "jobs/admin_list.html",
-        {"jobs": jobs, "page_title": "Jobs"},
+        {"jobs": page_obj, "page_obj": page_obj, "counters": counters, "page_title": "Jobs"},
     )
 
 

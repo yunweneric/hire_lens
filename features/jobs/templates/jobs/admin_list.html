@@ -1,7 +1,14 @@
 {% extends "layouts/admin.html" %}
 
 {% block content %}
-<div class="data-table-panel" x-data="{ confirmDelete: { open: false, title: '', action: '' } }">
+<div class="section-cards">
+  {% include "components/_section_card.html" with label="Total jobs" value=counters.total footer="All job postings" %}
+  {% include "components/_section_card.html" with label="Published" value=counters.published footer="Live on public job board" %}
+  {% include "components/_section_card.html" with label="Drafts" value=counters.draft footer="Not yet published" %}
+  {% include "components/_section_card.html" with label="Total applicants" value=counters.applicants footer="Across all roles" %}
+</div>
+
+<div class="data-table-panel mt-2" x-data="{ confirmDelete: { open: false, title: '', action: '' } }">
   <div class="data-table-toolbar">
     <div>
       <h2 class="text-base font-semibold">Jobs</h2>
@@ -26,7 +33,7 @@
     <tbody>
       {% for job in jobs %}
       <tr class="table-row">
-        <td class="table-cell text-muted-foreground tabular-nums">{{ forloop.counter }}</td>
+        <td class="table-cell text-muted-foreground tabular-nums">{{ page_obj.start_index|add:forloop.counter0 }}</td>
         <td class="table-cell font-medium">{{ job.title }}</td>
         <td class="table-cell">
           {% if job.is_published %}
@@ -79,6 +86,7 @@
     </tbody>
   </table>
   </div>
+  {% include "components/_pagination.html" %}
 {% else %}
   <div class="px-6 py-12">
   {% include "components/_empty_state.html" with title="No jobs yet" description="Create your first job posting." %}

@@ -37,9 +37,53 @@
           <dt class="dt">Applied</dt>
           <dd class="mt-0.5">{{ application.created_at|date:"F j, Y · g:i A" }}</dd>
         </div>
+        <div>
+          <dt class="dt">Status</dt>
+          <dd class="mt-1">
+            {% include "components/_status_badge.html" with status=application.status label=application.get_status_display %}
+          </dd>
+        </div>
       </dl>
 
       <div class="mt-6 flex flex-col gap-2 border-t pt-4">
+        {# Change status #}
+        <div class="relative" x-data="{ open: false }">
+          <button type="button"
+                  @click="open = !open"
+                  @click.outside="open = false"
+                  @keydown.escape.window="open = false"
+                  class="btn-primary btn-sm w-full justify-between"
+                  aria-haspopup="true"
+                  :aria-expanded="open">
+            <span class="inline-flex items-center gap-2">
+              <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+              Change status
+            </span>
+            <svg class="size-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div x-show="open" x-cloak x-transition.origin.top class="dropdown-menu left-0 w-full">
+            {% for value, label in status_choices %}
+            <form method="post" action="{% url 'admin_panel:application_set_status' pk=application.pk %}">
+              {% csrf_token %}
+              <input type="hidden" name="status" value="{{ value }}" />
+              <button type="submit" class="dropdown-item {% if application.status == value %}font-semibold text-foreground{% endif %}">
+                {% if application.status == value %}
+                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                {% else %}
+                <span class="size-4"></span>
+                {% endif %}
+                {{ label }}
+              </button>
+            </form>
+            {% endfor %}
+          </div>
+        </div>
+
+        <a href="mailto:{{ application.email }}" class="btn-outline btn-sm w-full">
+          <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          Email candidate
+        </a>
+
         <a href="{% url 'admin_panel:application_resume' pk=application.pk %}" class="btn-outline btn-sm w-full">
           <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
           Download resume

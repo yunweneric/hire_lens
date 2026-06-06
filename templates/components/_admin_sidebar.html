@@ -44,6 +44,13 @@
               <span>Jobs</span>
             </a>
           </li>
+          <li>
+            <a href="{% url 'admin_panel:applications_list' %}"
+               class="sidebar-menu-btn {% if '/admin/applications' in path %}is-active{% endif %}">
+              <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+              <span>Applications</span>
+            </a>
+          </li>
           {% endwith %}
         </ul>
       </div>
@@ -112,6 +119,7 @@
     <a href="{% url 'admin_panel:job_create' %}" class="sidebar-quick-create mb-2" @click="sidebarOpen = false">Quick Create</a>
     <a href="{% url 'admin_panel:dashboard' %}" class="sidebar-menu-btn" @click="sidebarOpen = false">Dashboard</a>
     <a href="{% url 'admin_panel:jobs_list' %}" class="sidebar-menu-btn" @click="sidebarOpen = false">Jobs</a>
+    <a href="{% url 'admin_panel:applications_list' %}" class="sidebar-menu-btn" @click="sidebarOpen = false">Applications</a>
     <div class="mt-4 px-2">{% include "components/_theme_switcher.html" %}</div>
   </div>
   <div class="sidebar-footer p-2">
