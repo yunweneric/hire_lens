@@ -34,3 +34,7 @@ static/dist/
 htmlcov/
 .coverage
 .pytest_cache/
+
+
+.claude
+.claude/*
