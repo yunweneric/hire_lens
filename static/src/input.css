@@ -556,4 +556,26 @@
   .dt {
     @apply text-xs font-medium uppercase tracking-wide text-muted-foreground;
   }
+
+  /* Dropdown / row action menu */
+  .dropdown-menu {
+    @apply absolute right-0 z-50 mt-1 w-44 origin-top-right overflow-hidden rounded-lg border bg-popover p-1 text-popover-foreground shadow-md;
+  }
+
+  .dropdown-item {
+    @apply flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-accent hover:text-accent-foreground;
+  }
+
+  .dropdown-item-danger {
+    @apply dropdown-item text-destructive hover:bg-destructive/10 hover:text-destructive;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm;
+  }
+
+  .modal-card {
+    @apply w-full max-w-md rounded-xl border bg-card p-6 text-card-foreground shadow-lg;
+  }
 }

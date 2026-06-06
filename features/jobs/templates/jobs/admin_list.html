@@ -1,7 +1,7 @@
 {% extends "layouts/admin.html" %}
 
 {% block content %}
-<div class="data-table-panel">
+<div class="data-table-panel" x-data="{ confirmDelete: { open: false, title: '', action: '' } }">
   <div class="data-table-toolbar">
     <div>
       <h2 class="text-base font-semibold">Jobs</h2>
@@ -38,15 +38,41 @@
         <td class="table-cell">{{ job.application_count }}</td>
         <td class="table-cell text-muted-foreground">{{ job.created_at|date:"M j, Y" }}</td>
         <td class="table-cell text-right">
-          <a href="{% url 'admin_panel:job_applicants' job_id=job.pk %}" class="btn-ghost btn-sm">Applicants</a>
-          <a href="{% url 'admin_panel:job_rankings' job_id=job.pk %}" class="btn-ghost btn-sm">Rankings</a>
-          <a href="{% url 'admin_panel:job_edit' pk=job.pk %}" class="btn-ghost btn-sm">Edit</a>
-          <form method="post" action="{% url 'admin_panel:job_toggle_publish' pk=job.pk %}" class="inline">
-            {% csrf_token %}
-            <button type="submit" class="btn-ghost btn-sm">
-              {% if job.is_published %}Unpublish{% else %}Publish{% endif %}
+          <div class="relative inline-block text-left" x-data="{ open: false }">
+            <button type="button"
+                    @click="open = !open"
+                    @click.outside="open = false"
+                    @keydown.escape.window="open = false"
+                    class="btn-ghost btn-icon"
+                    aria-haspopup="true"
+                    :aria-expanded="open"
+                    aria-label="Job actions">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="5" cy="12" r="1"></circle>
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="19" cy="12" r="1"></circle>
+              </svg>
             </button>
-          </form>
+            <div x-show="open" x-cloak x-transition.origin.top.right
+                 @click="open = false"
+                 class="dropdown-menu">
+              <a href="{% url 'admin_panel:job_applicants' job_id=job.pk %}" class="dropdown-item">Applicants</a>
+              <a href="{% url 'admin_panel:job_rankings' job_id=job.pk %}" class="dropdown-item">Rankings</a>
+              <a href="{% url 'admin_panel:job_edit' pk=job.pk %}" class="dropdown-item">Edit</a>
+              <form method="post" action="{% url 'admin_panel:job_toggle_publish' pk=job.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="dropdown-item">
+                  {% if job.is_published %}Unpublish{% else %}Publish{% endif %}
+                </button>
+              </form>
+              <button type="button"
+                      class="dropdown-item-danger"
+                      @click="confirmDelete = { open: true, title: '{{ job.title|escapejs }}', action: '{% url 'admin_panel:job_delete' pk=job.pk %}' }">
+                Delete
+              </button>
+            </div>
+          </div>
         </td>
       </tr>
       {% endfor %}
@@ -59,5 +85,28 @@
   <div class="mt-4 text-center"><a href="{% url 'admin_panel:job_create' %}" class="btn-primary">New job</a></div>
   </div>
 {% endif %}
+
+  <!-- Delete confirmation modal -->
+  <div x-show="confirmDelete.open" x-cloak
+       @keydown.escape.window="confirmDelete.open = false"
+       class="modal-overlay">
+    <div class="modal-card"
+         @click.outside="confirmDelete.open = false"
+         x-transition.scale.origin.center>
+      <h3 class="text-lg font-semibold">Delete job</h3>
+      <p class="mt-2 text-sm text-muted-foreground">
+        Are you sure you want to delete
+        <span class="font-medium text-foreground" x-text="'“' + confirmDelete.title + '”'"></span>?
+        This will also remove its applications and cannot be undone.
+      </p>
+      <div class="mt-6 flex justify-end gap-2">
+        <button type="button" class="btn-outline btn-sm" @click="confirmDelete.open = false">Cancel</button>
+        <form method="post" :action="confirmDelete.action">
+          {% csrf_token %}
+          <button type="submit" class="btn-destructive btn-sm">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

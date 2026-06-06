@@ -80,6 +80,16 @@ def admin_job_preview_markdown(request):
 
 @admin_required
 @require_http_methods(["POST"])
+def admin_job_delete(request, pk):
+    job = get_object_or_404(job_service.get_queryset(), pk=pk)
+    title = job.title
+    job_service.delete(job)
+    messages.success(request, f'Job "{title}" deleted.')
+    return redirect("admin_panel:jobs_list")
+
+
+@admin_required
+@require_http_methods(["POST"])
 def admin_job_toggle_publish(request, pk):
     job = get_object_or_404(job_service.get_queryset(), pk=pk)
     job.is_published = not job.is_published

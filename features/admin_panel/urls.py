@@ -13,6 +13,7 @@ urlpatterns = [
     path("jobs/preview/", job_admin.admin_job_preview_markdown, name="job_preview"),
     path("jobs/<int:pk>/edit/", job_admin.admin_job_edit, name="job_edit"),
     path("jobs/<int:pk>/publish/", job_admin.admin_job_toggle_publish, name="job_toggle_publish"),
+    path("jobs/<int:pk>/delete/", job_admin.admin_job_delete, name="job_delete"),
     path("jobs/<int:job_id>/applicants/", app_admin.admin_job_applicants, name="job_applicants"),
     path("jobs/<int:job_id>/rankings/", app_admin.admin_job_rankings, name="job_rankings"),
     path("applications/<int:pk>/", app_admin.admin_application_detail, name="application_detail"),
