@@ -71,14 +71,15 @@ build_frontend() {
 cd "$APP_DIR"
 
 # --- 1. Latest code ---------------------------------------------------------
-if [[ "$SKIP_GIT" != "1" ]]; then
-  log "Pulling latest code ($BRANCH)"
-  git fetch --all --prune
-  git checkout "$BRANCH"
-  git pull --ff-only origin "$BRANCH"
-else
-  log "SKIP_GIT=1 — deploying current working tree"
-fi
+# if [[ "$SKIP_GIT" != "1" ]]; then
+#   log "Pulling latest code ($BRANCH)"
+#   git fetch --all --prune
+#   git checkout "$BRANCH"
+#   git pull --ff-only origin "$BRANCH"
+# else
+#   log "SKIP_GIT=1 — deploying current working tree"
+# fi
+log "Deploying current working tree (git pull disabled)"
 
 # --- 2. Python dependencies -------------------------------------------------
 log "Installing Python dependencies"
