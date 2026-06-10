@@ -46,3 +46,8 @@ class Command(BaseCommand):
 
         verb = "Created" if created else "Updated"
         self.stdout.write(self.style.SUCCESS(f"{verb} admin user {email}"))
+
+
+# python manage.py ensure_admin --email "admin@hirelens.com" --password "password@123"
+
+# ADMIN_EMAIL=admin@hirelens.com ADMIN_PASSWORD=password@123 ./deploy/redeploy.sh
