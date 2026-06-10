@@ -24,6 +24,9 @@ SKIP_GIT="${SKIP_GIT:-0}"             # set to 1 to deploy current working tree
 SKIP_NPM="${SKIP_NPM:-0}"             # set to 1 to skip the Tailwind build
 SKIP_APT="${SKIP_APT:-0}"             # set to 1 to skip apt install
 SKIP_SERVICES="${SKIP_SERVICES:-0}"   # set to 1 to skip systemctl/nginx restart
+SKIP_SEED_ADMIN="${SKIP_SEED_ADMIN:-0}"  # set to 1 to skip admin user seeding
+ADMIN_EMAIL="${ADMIN_EMAIL:-admin@hirelens.com}"
+ADMIN_PASSWORD="${ADMIN_PASSWORD:-password@123}"
 
 # --- Helpers ----------------------------------------------------------------
 log() { printf '\n\033[1;34m==>\033[0m %s\n' "$*"; }
@@ -143,15 +146,23 @@ build_frontend
 log "Applying database migrations"
 python manage.py migrate --noinput
 
-# --- 5. Static files --------------------------------------------------------
+# --- 5. Admin user ----------------------------------------------------------
+if [[ "$SKIP_SEED_ADMIN" != "1" ]]; then
+  log "Ensuring admin user ($ADMIN_EMAIL)"
+  python manage.py ensure_admin --email "$ADMIN_EMAIL" --password "$ADMIN_PASSWORD"
+else
+  log "SKIP_SEED_ADMIN=1 — skipping admin user seeding"
+fi
+
+# --- 6. Static files --------------------------------------------------------
 log "Collecting static files"
 python manage.py collectstatic --noinput
 
-# --- 6. Sanity check --------------------------------------------------------
+# --- 7. Sanity check --------------------------------------------------------
 log "Running Django system checks"
 python manage.py check --deploy || true
 
-# --- 7. Restart services ----------------------------------------------------
+# --- 8. Restart services ----------------------------------------------------
 restart_services
 
 log "Done. Deploy complete. ✅"
