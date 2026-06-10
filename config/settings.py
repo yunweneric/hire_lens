@@ -19,6 +19,16 @@ DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS")
 
+# Railway provides the public domain at runtime; trust it automatically so the
+# deployment works without hardcoding the generated *.up.railway.app host.
+RAILWAY_PUBLIC_DOMAIN = env("RAILWAY_PUBLIC_DOMAIN", default="")
+if RAILWAY_PUBLIC_DOMAIN:
+    if RAILWAY_PUBLIC_DOMAIN not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(RAILWAY_PUBLIC_DOMAIN)
+    railway_origin = f"https://{RAILWAY_PUBLIC_DOMAIN}"
+    if railway_origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(railway_origin)
+
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = True

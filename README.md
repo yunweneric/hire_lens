@@ -43,8 +43,7 @@ Production runs on Ubuntu behind **Nginx + Gunicorn** with **PostgreSQL** and a 
 
 ```bash
 # On the server, after the initial setup:
-cd /var/www/hirelens
-git pull
+cd /app
 sudo ./deploy/redeploy.sh
 ```
 

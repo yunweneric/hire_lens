@@ -6,7 +6,7 @@
 # collects static files, and restarts the app + nginx.
 #
 # Usage (on the server):
-#   cd /var/www/hirelens
+#   cd /app
 #   sudo ./deploy/redeploy.sh
 #
 # Override defaults with env vars, e.g.:
@@ -15,15 +15,58 @@
 set -euo pipefail
 
 # --- Config (override via environment) --------------------------------------
-APP_DIR="${APP_DIR:-/var/www/hirelens}"
+APP_DIR="${APP_DIR:-/app}"
 VENV_DIR="${VENV_DIR:-$APP_DIR/venv}"
 SERVICE="${SERVICE:-hirelens}"        # systemd unit name for gunicorn
 BRANCH="${BRANCH:-main}"
 SKIP_GIT="${SKIP_GIT:-0}"             # set to 1 to deploy current working tree
 SKIP_NPM="${SKIP_NPM:-0}"             # set to 1 to skip the Tailwind build
+SKIP_APT="${SKIP_APT:-0}"             # set to 1 to skip apt install (curl/nodejs)
 
 # --- Helpers ----------------------------------------------------------------
 log() { printf '\n\033[1;34m==>\033[0m %s\n' "$*"; }
+
+apt_install() {
+  if [[ "$SKIP_APT" == "1" ]]; then
+    log "SKIP_APT=1 — skipping apt install"
+    return
+  fi
+  if ! command -v apt-get >/dev/null 2>&1; then
+    log "apt-get not found — skipping system package install"
+    return
+  fi
+  log "Installing curl, nodejs, and npm (apt)"
+  if [[ "$(id -u)" -eq 0 ]]; then
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get install -y curl nodejs npm
+  else
+    sudo apt-get update
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y curl nodejs npm
+  fi
+}
+
+build_frontend() {
+  if [[ "$SKIP_NPM" == "1" ]]; then
+    log "SKIP_NPM=1 — skipping CSS build"
+    return
+  fi
+
+  apt_install
+
+  if [[ -f "${HOME}/.bashrc" ]]; then
+    # shellcheck disable=SC1090
+    source "${HOME}/.bashrc" || true
+  fi
+
+  if ! command -v npm >/dev/null 2>&1; then
+    echo "npm not found. Install Node.js on the server or set SKIP_NPM=1." >&2
+    exit 1
+  fi
+
+  log "Building Tailwind CSS"
+  npm install --no-audit --no-fund
+  npm run build:css
+}
 
 cd "$APP_DIR"
 
@@ -45,15 +88,7 @@ pip install --upgrade pip
 pip install -r requirements.txt
 
 # --- 3. Frontend (Tailwind CSS) --------------------------------------------
-if [[ "$SKIP_NPM" != "1" ]]; then
-  if command -v npm >/dev/null 2>&1; then
-    log "Building Tailwind CSS"
-    npm install --no-audit --no-fund
-    npm run build:css
-  else
-    log "npm not found — skipping CSS build (set SKIP_NPM=1 to silence)"
-  fi
-fi
+build_frontend
 
 # --- 4. Database migrations --------------------------------------------------
 log "Applying database migrations"
