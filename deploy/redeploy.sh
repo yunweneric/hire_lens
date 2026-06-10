@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
-# Redeploy HireLens on the Ubuntu server.
+# Redeploy HireLens on the Ubuntu server or container.
 #
-# Pulls latest code, installs deps, rebuilds CSS, migrates the DB,
-# collects static files, and restarts the app + nginx.
+# Installs deps, rebuilds CSS, migrates the DB, collects static files,
+# and restarts the app + nginx when systemd is available.
 #
-# Usage (on the server):
+# Usage:
 #   cd /app
-#   sudo ./deploy/redeploy.sh
+#   ./deploy/redeploy.sh
 #
 # Override defaults with env vars, e.g.:
 #   APP_DIR=/srv/hirelens SERVICE=hirelens ./deploy/redeploy.sh
@@ -15,16 +15,26 @@
 set -euo pipefail
 
 # --- Config (override via environment) --------------------------------------
-APP_DIR="${APP_DIR:-/app}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_DIR="${APP_DIR:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 VENV_DIR="${VENV_DIR:-$APP_DIR/venv}"
 SERVICE="${SERVICE:-hirelens}"        # systemd unit name for gunicorn
 BRANCH="${BRANCH:-main}"
 SKIP_GIT="${SKIP_GIT:-0}"             # set to 1 to deploy current working tree
 SKIP_NPM="${SKIP_NPM:-0}"             # set to 1 to skip the Tailwind build
-SKIP_APT="${SKIP_APT:-0}"             # set to 1 to skip apt install (curl/nodejs)
+SKIP_APT="${SKIP_APT:-0}"             # set to 1 to skip apt install
+SKIP_SERVICES="${SKIP_SERVICES:-0}"   # set to 1 to skip systemctl/nginx restart
 
 # --- Helpers ----------------------------------------------------------------
 log() { printf '\n\033[1;34m==>\033[0m %s\n' "$*"; }
+
+run_as_root() {
+  if [[ "$(id -u)" -eq 0 ]]; then
+    "$@"
+  else
+    sudo "$@"
+  fi
+}
 
 apt_install() {
   if [[ "$SKIP_APT" == "1" ]]; then
@@ -35,14 +45,30 @@ apt_install() {
     log "apt-get not found — skipping system package install"
     return
   fi
-  log "Installing curl, nodejs, and npm (apt)"
-  if [[ "$(id -u)" -eq 0 ]]; then
-    apt-get update
-    DEBIAN_FRONTEND=noninteractive apt-get install -y curl nodejs npm
-  else
-    sudo apt-get update
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y curl nodejs npm
+  log "Installing curl, nodejs, npm, and Python tooling (apt)"
+  run_as_root apt-get update
+  run_as_root env DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    curl nodejs npm python3 python3-pip python3-venv
+}
+
+activate_python() {
+  if [[ -f "$VENV_DIR/bin/activate" ]]; then
+    log "Using virtualenv at $VENV_DIR"
+    # shellcheck disable=SC1091
+    source "$VENV_DIR/bin/activate"
+    return
   fi
+
+  if command -v python3 >/dev/null 2>&1; then
+    log "Creating virtualenv at $VENV_DIR"
+    python3 -m venv "$VENV_DIR"
+    # shellcheck disable=SC1091
+    source "$VENV_DIR/bin/activate"
+    return
+  fi
+
+  echo "python3 not found. Install Python or set VENV_DIR to an existing venv." >&2
+  exit 1
 }
 
 build_frontend() {
@@ -64,11 +90,34 @@ build_frontend() {
   fi
 
   log "Building Tailwind CSS"
-  npm install --no-audit --no-fund
-  npm run build:css
+  (cd "$APP_DIR" && npm install --no-audit --no-fund && npm run build:css)
+}
+
+restart_services() {
+  if [[ "$SKIP_SERVICES" == "1" ]]; then
+    log "SKIP_SERVICES=1 — skipping service restart"
+    return
+  fi
+  if ! command -v systemctl >/dev/null 2>&1 || [[ ! -d /run/systemd/system ]]; then
+    log "systemd not available — skipping service restart"
+    return
+  fi
+
+  log "Restarting $SERVICE"
+  run_as_root systemctl restart "$SERVICE"
+
+  if command -v nginx >/dev/null 2>&1; then
+    log "Reloading nginx"
+    run_as_root nginx -t
+    run_as_root systemctl reload nginx
+  fi
+
+  log "Status"
+  run_as_root systemctl --no-pager --lines=0 status "$SERVICE" || true
 }
 
 cd "$APP_DIR"
+log "App directory: $APP_DIR"
 
 # --- 1. Latest code ---------------------------------------------------------
 # if [[ "$SKIP_GIT" != "1" ]]; then
@@ -83,8 +132,7 @@ log "Deploying current working tree (git pull disabled)"
 
 # --- 2. Python dependencies -------------------------------------------------
 log "Installing Python dependencies"
-# shellcheck disable=SC1091
-source "$VENV_DIR/bin/activate"
+activate_python
 pip install --upgrade pip
 pip install -r requirements.txt
 
@@ -104,13 +152,6 @@ log "Running Django system checks"
 python manage.py check --deploy || true
 
 # --- 7. Restart services ----------------------------------------------------
-log "Restarting $SERVICE"
-systemctl restart "$SERVICE"
-
-log "Reloading nginx"
-nginx -t && systemctl reload nginx
-
-log "Status"
-systemctl --no-pager --lines=0 status "$SERVICE" || true
+restart_services
 
 log "Done. Deploy complete. ✅"
