@@ -2,6 +2,10 @@ from django import forms
 
 from features.accounts.forms import INPUT_CLASS
 from features.jobs.models import JobDescription
+from features.jobs.validators import (
+    MAX_DESCRIPTION_LENGTH,
+    validate_no_dangerous_html,
+)
 
 
 class JobDescriptionForm(forms.ModelForm):
@@ -31,3 +35,20 @@ class JobDescriptionForm(forms.ModelForm):
             "description": "Description (Markdown)",
             "is_published": "Publish on public job board",
         }
+
+    def clean_title(self):
+        title = (self.cleaned_data.get("title") or "").strip()
+        if not title:
+            raise forms.ValidationError("Title cannot be empty.")
+        return title
+
+    def clean_description(self):
+        description = (self.cleaned_data.get("description") or "").strip()
+        if not description:
+            raise forms.ValidationError("Description cannot be empty.")
+        if len(description) > MAX_DESCRIPTION_LENGTH:
+            raise forms.ValidationError(
+                f"Description is too long (maximum {MAX_DESCRIPTION_LENGTH:,} characters)."
+            )
+        validate_no_dangerous_html(description)
+        return description

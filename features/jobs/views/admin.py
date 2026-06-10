@@ -10,6 +10,7 @@ from core.utils.markdown import render_markdown
 from core.utils.pagination import paginate
 from features.jobs.forms import JobDescriptionForm
 from features.jobs.services import job_service
+from features.jobs.validators import MAX_DESCRIPTION_LENGTH
 
 
 @admin_required
@@ -77,6 +78,11 @@ def admin_job_preview_markdown(request):
     markdown_text = payload.get("markdown", "")
     if not isinstance(markdown_text, str):
         return JsonResponse({"error": "markdown must be a string"}, status=400)
+    if len(markdown_text) > MAX_DESCRIPTION_LENGTH:
+        return JsonResponse(
+            {"error": f"markdown exceeds {MAX_DESCRIPTION_LENGTH} characters"},
+            status=400,
+        )
     return JsonResponse({"html": render_markdown(markdown_text)})
 
 
